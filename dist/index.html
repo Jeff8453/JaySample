@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>JaySample — Sample & Perform</title
+  ><link rel="stylesheet" href="style.css" />
+  <body>
+    <header>
+      <a class="brand" href="#"
+        >◈ <b>SAMPLE<span>FORGE</span></b></a
+      ><span class="tag">SAMPLE / SHAPE / PERFORM</span
+      ><button id="demo">↻ Demo</button
+      ><label class="primary" tabindex="0" id="importlabel"
+        >＋ Load sample<input id="file" type="file" accept="audio/*" hidden
+      /></label>
+    </header>
+    <main>
+      <div class="projectbar panel">
+        <label
+          >PROJECT
+          <input
+            id="projectname"
+            value="Untitled session"
+            maxlength="80"
+            aria-label="Project name" /></label
+        ><button id="saveproject">↓ Save project</button
+        ><label class="filebutton"
+          >Open project<input
+            type="file"
+            id="openproject"
+            accept=".sforge"
+            hidden /></label
+        ><button id="undo" disabled>↶ Undo</button
+        ><button id="redo" disabled>↷ Redo</button
+        ><span id="savestatus">Not saved yet</span>
+      </div>
+      <div id="recovery" class="recovery" hidden>
+        Local recovery available. <button id="restore">Restore session</button
+        ><button id="dismissrestore">Dismiss</button>
+      </div>
+      <div class="top">
+        <div>
+          <small>THE CHOPPING LAB + THE PERFORMANCE DECK</small>
+          <h1>Your sample. Every possibility.</h1>
+        </div>
+        <div class="status">
+          <i></i> LOCAL AUDIO ENGINE<span>FILES STAY IN YOUR BROWSER</span>
+        </div>
+      </div>
+      <section class="panel">
+        <div class="sectionhead">
+          <div>
+            <span class="dot"></span> SOURCE
+            <span class="muted" id="filename">Forge break · Demo</span>
+          </div>
+          <span id="duration"></span>
+        </div>
+        <div class="matchbar">
+          <button id="analyze">✧ Detect key + BPM</button
+          ><label
+            >SOURCE BPM<input
+              id="sourcebpm"
+              type="number"
+              value="120"
+              min="30"
+              max="300"
+              step="0.1" /></label
+          ><span class="arrow">→</span
+          ><label
+            >TARGET BPM<input
+              id="targetbpm"
+              type="number"
+              value="120"
+              min="30"
+              max="300"
+              step="0.1" /></label
+          ><button id="sync">Tempo match</button
+          ><label>SOURCE KEY<select id="sourcekey"></select></label
+          ><span class="arrow">→</span
+          ><label>TARGET KEY<select id="targetkey"></select></label
+          ><span id="shift" class="orange">0 st</span>
+        </div>
+        <div id="analysisnote">
+          Detection is an estimate. Confirm or edit the source BPM and key.
+        </div>
+        <div class="performancebar">
+          <button id="clockplay">▶ Clock</button
+          ><button id="clicktrack">Click off</button
+          ><label
+            >QUANTIZE<select id="quantize">
+              <option value="0">Off</option>
+              <option value="1">1 beat</option>
+              <option value="0.5">½ beat</option>
+              <option value="0.25">¼ beat</option>
+            </select></label
+          ><label
+            >SNAP<select id="snap">
+              <option value="off">Off</option>
+              <option value="zero">Zero crossing</option>
+              <option value="beat">Beat grid</option>
+            </select></label
+          ><label
+            >QUALITY<select id="quality">
+              <option value="studio">Studio spectral</option>
+              <option value="fast">Fast spectral</option>
+            </select></label
+          ><button id="formants">Preserve formants</button
+          ><span id="engineinfo">Spectral engine · worker processing</span>
+        </div>
+        <div class="wave">
+          <canvas
+            id="wave"
+            aria-label="Waveform: click to place cursor; drag cue edges to trim"
+          ></canvas>
+          <div class="wave-label">
+            CLICK TO SEEK · DRAG CUE EDGES TO TRIM · DOUBLE CLICK TO ADD CUE
+          </div>
+        </div>
+        <div class="transport">
+          <button id="preview">▶ Source</button
+          ><button id="stop">■ Stop all</button
+          ><button id="addcue">＋ Set cue here</button>
+          <div class="spacer"></div>
+          <label
+            >ZOOM
+            <input
+              id="zoom"
+              type="range"
+              min="1"
+              max="200"
+              step="1"
+              value="1" /></label
+          ><label
+            >POSITION <input id="pan" type="range" min="0" max="100" value="0"
+          /></label>
+        </div>
+        <div class="transport lower">
+          <label
+            >SLICES
+            <select id="count">
+              <option>8</option>
+              <option selected>16</option>
+            </select></label
+          ><button id="chop">Slice evenly</button
+          ><button id="transients" class="primary">Find transients</button
+          ><span class="muted">Edits replace cues in the current bank.</span>
+          <div class="spacer"></div>
+          <label
+            >VOICES
+            <select id="voices">
+              <option value="mono">Mono / choke</option>
+              <option value="poly">Polyphonic</option>
+            </select></label
+          >
+        </div>
+      </section>
+      <div class="workspace">
+        <section class="panel pads-panel">
+          <div class="sectionhead">
+            <div>
+              PERFORMANCE BANK
+              <span class="muted">SHIFT + CLICK TO SELECT SILENTLY</span>
+            </div>
+            <div id="banks"></div>
+          </div>
+          <div class="midibar">
+            <button id="connectmidi">Connect MIDI</button
+            ><select id="midiinput" aria-label="MIDI input">
+              <option value="">No MIDI input</option></select
+            ><label
+              >CLOCK<select id="clocksource">
+                <option value="internal">Internal</option>
+                <option value="midi">MIDI clock</option>
+              </select></label
+            ><span id="midistatus"
+              >Pads: notes 36–51 · Pitch root: C3 (48)</span
+            >
+          </div>
+          <div class="modebar">
+            <button id="padmode" class="active">Cue pads</button
+            ><button id="keymode">Keyboard pitch</button
+            ><span id="modehint">Each pad plays its own cue</span>
+          </div>
+          <div class="banktools">
+            <button id="preparebank">Prepare bank</button
+            ><button id="preparekeys">Prepare keyboard</button
+            ><label
+              >MASTER
+              <input
+                id="master"
+                type="range"
+                min="0"
+                max="100"
+                value="80"
+                aria-label="Master volume" /></label
+            ><meter
+              id="peak"
+              min="0"
+              max="1"
+              low="0.65"
+              high="0.9"
+              optimum="0.4"
+              value="0"
+              aria-label="Output level"
+            ></meter
+            ><span id="voicecount">0 voices</span>
+          </div>
+          <div id="pads" class="pads"></div>
+          <div class="padfooter">
+            <span>Q W E R / A S D F / Z X C V / 1 2 3 4 · SPACE TO STOP</span
+            ><span>4 BANKS / 64 CUES</span>
+          </div>
+        </section>
+        <aside class="panel">
+          <div class="sectionhead">
+            CUE EDITOR <span class="orange" id="padtitle"></span>
+          </div>
+          <div class="settings">
+            <h2 id="sliceName"></h2>
+            <label class="cuename"
+              >NAME <input id="cuename" maxlength="80" aria-label="Cue name"
+            /></label>
+            <p id="cuehint">Settings follow the selected cue.</p>
+            <div class="trim">
+              <label
+                >START / SECONDS<input
+                  id="start"
+                  type="number"
+                  min="0"
+                  step="0.001" /></label
+              ><label
+                >END / SECONDS<input
+                  id="end"
+                  type="number"
+                  min="0"
+                  step="0.001"
+              /></label>
+            </div>
+            <label class="setting"
+              >PITCH <output id="pitchout"></output
+              ><input
+                id="pitch"
+                type="range"
+                min="-24"
+                max="24"
+                value="0" /></label
+            ><label class="setting"
+              >LEVEL <output id="gainout"></output
+              ><input
+                id="gain"
+                type="range"
+                min="0"
+                max="100"
+                value="80" /></label
+            ><label class="setting"
+              >LOW PASS <output id="filterout"></output
+              ><input
+                id="filter"
+                type="range"
+                min="100"
+                max="20000"
+                value="20000"
+                step="100"
+            /></label>
+            <div class="trim">
+              <label
+                >ATTACK / MS<input
+                  id="attack"
+                  type="number"
+                  min="0"
+                  max="2000"
+                  value="5" /></label
+              ><label
+                >RELEASE / MS<input
+                  id="release"
+                  type="number"
+                  min="0"
+                  max="5000"
+                  value="40"
+              /></label>
+            </div>
+            <label class="setting"
+              >PLAYBACK<select id="mode">
+                <option value="trigger">Trigger · play to end</option>
+                <option value="hold">Hold · play while pressed</option>
+                <option value="loop">Loop · tap to toggle</option>
+              </select></label
+            >
+            <div class="toggles">
+              <button id="reverse">↔ Reverse</button
+              ><button id="clear">× Clear cue</button>
+            </div>
+            <button id="playpad" class="primary wide">▶ Play cue</button
+            ><button id="export" class="wide">↓ Export cue WAV</button
+            ><button id="exportbank" class="wide">↓ Export bank + MIDI</button
+            ><button id="taptempo" class="wide">Tap source tempo</button>
+            <p class="note">
+              Lossless projects include audio and all four banks. Studio
+              processing runs away from the UI. Pitch and tempo process
+              independently. Keyboard pitch plays the selected cue from C3 to
+              D♯4. Export renders one pass with your settings.
+            </p>
+          </div>
+        </aside>
+      </div>
+      <footer>
+        <span
+          ><b>SAMPLE FORGE</b> &nbsp; Chop with precision. Play without
+          limits.</span
+        ><span id="message" role="status"></span>
+      </footer>
+      <details class="integration panel">
+        <summary>Logic & Ableton · DAW integration</summary>
+        <p>
+          Export a bank as WAV slices and a matching MIDI map for your DAW. The
+          Mac AU/VST3 source package is available below; it requires building on
+          macOS. This browser does not receive DAW host transport directly. Use
+          internal tempo or a MIDI clock input here.
+        </p>
+        <a href="JaySample-Mac-Source.zip" download
+          >↓ Mac AU / VST3 source & build instructions</a
+        >
+        <p>
+          Keyboard: ⌘S save · ⌘Z undo · ⇧⌘Z redo · Space stop. MIDI: notes 36–51
+          cue pads, note 48 original pitch in keyboard mode, CC7 master level,
+          CC123 panic, program 0–3 bank.
+        </p>
+      </details>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

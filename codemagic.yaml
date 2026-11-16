@@ -1,0 +1,60 @@
+# Use this one when the whole JaySample folder is the repo (the plugin source is in native/).
+# If you push only native/ as the repo, use native/codemagic.yaml instead.
+workflows:
+  jaysample-universal:
+    name: JaySample 0.4.0 Universal AU VST3 (High Sierra 10.13+)
+    working_directory: native
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      xcode: 16.4
+    scripts:
+      - name: DSP tests (seconds; stops the build early if anything is wrong)
+        script: |
+          clang++ -std=c++17 -O2 -I Source -I ThirdParty tests/dsp_test.cpp -o dsp_test
+          ./dsp_test
+
+      - name: Configure
+        script: |
+          cmake -B build -G Xcode \
+            "-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64" \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13
+
+      - name: Build
+        script: |
+          cmake --build build --config Release --target JaySample_AU JaySample_VST3 -- -quiet
+
+      - name: Ad-hoc sign + check it's universal and High Sierra-ready
+        script: |
+          set -e
+          ART=build/JaySample_artefacts/Release
+          codesign --force --deep -s - "$ART/AU/JaySample.component"
+          codesign --force --deep -s - "$ART/VST3/JaySample.vst3"
+          BIN="$ART/AU/JaySample.component/Contents/MacOS/JaySample"
+          lipo -info "$BIN"
+          MINOS=$(otool -l "$BIN" | awk '/LC_VERSION_MIN_MACOSX/{a=1} a&&$1=="version"{print $2; exit} /LC_BUILD_VERSION/{b=1} b&&$1=="minos"{print $2; exit}')
+          echo "Minimum macOS for this build: $MINOS"
+          case "$MINOS" in
+            10.13*) echo "OK - runs on High Sierra" ;;
+            *) echo "STOP - this build will not load on High Sierra"; exit 1 ;;
+          esac
+
+      - name: Package
+        script: |
+          mkdir -p dist
+          ART=build/JaySample_artefacts/Release
+          ditto -c -k --keepParent "$ART/AU/JaySample.component" dist/JaySample_0_4_0_AU_Universal.zip
+          ditto -c -k --keepParent "$ART/VST3/JaySample.vst3"    dist/JaySample_0_4_0_VST3_Universal.zip
+
+      - name: AU validation (informational on CI, real check is on the High Sierra Mac)
+        script: |
+          sudo mkdir -p /Library/Audio/Plug-Ins/Components
+          sudo cp -R "build/JaySample_artefacts/Release/AU/JaySample.component" /Library/Audio/Plug-Ins/Components/
+          sudo killall -9 AudioComponentRegistrar 2>/dev/null || true
+          killall -9 AudioComponentRegistrar 2>/dev/null || true
+          sleep 8
+          auval -a | grep -i Sf03 || echo "JaySample not listed by the CI registrar"
+          auval -v aumu Sf03 SmFg || echo "WARNING: auval failed on the CI machine. Validate on the High Sierra Mac."
+
+    artifacts:
+      - native/dist/*.zip
