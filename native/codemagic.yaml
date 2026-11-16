@@ -42,6 +42,10 @@ workflows:
           ART=build/JaySample_artefacts/Release
           ditto -c -k --keepParent "$ART/AU/JaySample.component" dist/JaySample_0_4_0_AU_Universal.zip
           ditto -c -k --keepParent "$ART/VST3/JaySample.vst3"    dist/JaySample_0_4_0_VST3_Universal.zip
+          # also hand them to Codemagic directly (works whatever the repo layout is)
+          if [ -n "$CM_EXPORT_DIR" ]; then mkdir -p "$CM_EXPORT_DIR" && cp dist/*.zip "$CM_EXPORT_DIR"/; fi
+          mkdir -p "$CM_BUILD_DIR/dist" && cp dist/*.zip "$CM_BUILD_DIR/dist/" 2>/dev/null || true
+          echo "Built in: $(pwd)"; ls -la dist
 
       - name: AU validation (informational on CI, real check is on the High Sierra Mac)
         script: |
@@ -55,3 +59,5 @@ workflows:
 
     artifacts:
       - dist/*.zip
+      - native/dist/*.zip
+      - "**/dist/JaySample_*.zip"
